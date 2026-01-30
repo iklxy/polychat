@@ -1,0 +1,13 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "Launch Package",
+            "type": "go",
+            "request": "launch",
+            "mode": "auto",
+            "program": "${fileDirname}", // 或者指定具体文件 "${file}"
+            "console": "integratedTerminal"  // <--- 关键！这会让它在终端里运行
+        }
+    ]
+}
