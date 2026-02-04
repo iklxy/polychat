@@ -52,12 +52,18 @@ func (h *UserHandle) Login(c *gin.Context) {
 	}
 
 	//调用user_service的Login方法
-	token, err := h.userService.Login(req.Username, req.Password)
+	token, userID, err := h.userService.Login(req.Username, req.Password)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"code": 500, "msg": "登录失败 : " + err.Error()})
 		return
 	}
 
 	//登录成功
-	c.JSON(http.StatusOK, gin.H{"code": 200, "msg": "登录成功", "token": token})
+	c.JSON(http.StatusOK, gin.H{
+		"code":     200,
+		"msg":      "登录成功",
+		"token":    token,
+		"user_id":  userID,
+		"username": req.Username,
+	})
 }

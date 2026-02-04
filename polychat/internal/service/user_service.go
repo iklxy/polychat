@@ -38,22 +38,22 @@ func (s *UserService) Register(username, password string) error {
 }
 
 // 登录
-func (s *UserService) Login(username, password string) (string, error) {
+func (s *UserService) Login(username, password string) (string, uint, error) {
 	//先查询用户是否存在
 	user, err := dao.GetUserByUsername(username)
 	if err != nil {
-		return "", errors.New("用户名不存在") //用户名不存在
+		return "", 0, errors.New("用户名不存在") //用户名不存在
 	}
 
 	//用户存在的前提下，校验密码
 	if !util.CheckPassword(password, user.Password) {
-		return "", errors.New("密码错误")
+		return "", 0, errors.New("密码错误")
 	}
 
 	//密码校验通过，返回token
 	token, err := util.GenerateToken(user.ID)
 	if err != nil {
-		return "", errors.New("token生成失败")
+		return "", 0, errors.New("token生成失败")
 	}
-	return token, nil
+	return token, user.ID, nil
 }

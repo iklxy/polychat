@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -62,7 +63,8 @@
             border-radius: 0.5rem;
             outline: none;
             transition: border-color 0.2s;
-            box-sizing: border-box; /* Important for padding */
+            box-sizing: border-box;
+            /* Important for padding */
         }
 
         .form-group input:focus {
@@ -104,105 +106,283 @@
         }
     </style>
 </head>
+
 <body>
 
-<div class="container" id="login-box">
-    <h2>欢迎回来</h2>
-    <form id="login-form">
-        <div class="form-group">
-            <label for="login-username">用户名</label>
-            <input type="text" id="login-username" required placeholder="请输入用户名">
+    <div class="container" id="login-box">
+        <h2>欢迎回来</h2>
+        <form id="login-form">
+            <div class="form-group">
+                <label for="login-username">用户名</label>
+                <input type="text" id="login-username" required placeholder="请输入用户名">
+            </div>
+            <div class="form-group">
+                <label for="login-password">密码</label>
+                <input type="password" id="login-password" required placeholder="请输入密码">
+            </div>
+            <button type="submit">登 录</button>
+        </form>
+        <div class="toggle-text">
+            还没有账号？ <a onclick="toggleView()">去注册</a>
         </div>
-        <div class="form-group">
-            <label for="login-password">密码</label>
-            <input type="password" id="login-password" required placeholder="请输入密码">
-        </div>
-        <button type="submit">登 录</button>
-    </form>
-    <div class="toggle-text">
-        还没有账号？ <a onclick="toggleView()">去注册</a>
     </div>
-</div>
 
-<div class="container hidden" id="register-box">
-    <h2>创建账号</h2>
-    <form id="register-form">
-        <div class="form-group">
-            <label for="reg-username">用户名</label>
-            <input type="text" id="reg-username" required placeholder="设置用户名">
+    <div class="container hidden" id="register-box">
+        <h2>创建账号</h2>
+        <form id="register-form">
+            <div class="form-group">
+                <label for="reg-username">用户名</label>
+                <input type="text" id="reg-username" required placeholder="设置用户名">
+            </div>
+            <div class="form-group">
+                <label for="reg-password">密码</label>
+                <input type="password" id="reg-password" required placeholder="设置密码">
+            </div>
+            <button type="submit">注 册</button>
+        </form>
+        <div class="toggle-text">
+            已有账号？ <a onclick="toggleView()">去登录</a>
         </div>
-        <div class="form-group">
-            <label for="reg-password">密码</label>
-            <input type="password" id="reg-password" required placeholder="设置密码">
-        </div>
-        <button type="submit">注 册</button>
-    </form>
-    <div class="toggle-text">
-        已有账号？ <a onclick="toggleView()">去登录</a>
     </div>
-</div>
 
-<script>
-    const loginBox = document.getElementById('login-box');
-    const registerBox = document.getElementById('register-box');
+    <!-- 聊天室界面 -->
+    <div class="container hidden" id="chat-box"
+        style="max-width: 800px; height: 80vh; display: none; flex-direction: column;">
+        <div
+            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
+            <h2 style="margin: 0; text-align: left;">PolyChat 聊天室</h2>
+            <div>
+                <span id="current-user-info" style="margin-right: 1rem; color: #666; font-size: 0.9rem;"></span>
+                <button onclick="logout()"
+                    style="width: auto; padding: 0.5rem 1rem; background: #e53e3e; font-size: 0.9rem;">退出</button>
+            </div>
+        </div>
 
-    function toggleView() {
-        loginBox.classList.toggle('hidden');
-        registerBox.classList.toggle('hidden');
-    }
+        <div style="display: flex; flex: 1; gap: 1rem; overflow: hidden;">
+            <!-- 在线用户列表 (简化版，暂未对接实时列表) -->
+            <div
+                style="width: 200px; background: #f8f9fa; border-radius: 0.5rem; padding: 1rem; display: flex; flex-direction: column;">
+                <h3 style="margin-top: 0; font-size: 1rem; color: #4a5568;">发送给 (ID)</h3>
+                <input type="number" id="receiver-id" placeholder="输入对方ID"
+                    style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; width: 100%;">
+                <div style="margin-top: 1rem; font-size: 0.8rem; color: #718096;">
+                    提示:输入对方的用户ID即可私聊。
+                </div>
+            </div>
 
-    async function handleAuth(url, data) {
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            });
-            const result = await response.json();
-            
-            if (response.ok && result.code === 200) {
-                return result;
-            } else {
-                throw new Error(result.msg || '操作失败');
+            <!-- 聊天消息区域 -->
+            <div
+                style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
+                <div id="message-list"
+                    style="flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
+                    <!-- 消息气泡示例 -->
+                    <div
+                        style="align-self: flex-start; background: #edf2f7; padding: 0.5rem 1rem; border-radius: 1rem 1rem 1rem 0; max-width: 70%;">
+                        欢迎来到 PolyChat!
+                    </div>
+                </div>
+
+                <div style="padding: 1rem; border-top: 1px solid #e2e8f0; display: flex; gap: 0.5rem;">
+                    <input type="text" id="msg-content" placeholder="输入消息..."
+                        style="flex: 1; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none;">
+                    <button onclick="sendMessage()" style="width: auto; padding: 0 1.5rem;">发送</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const loginBox = document.getElementById('login-box');
+        const registerBox = document.getElementById('register-box');
+        const chatBox = document.getElementById('chat-box');
+        let ws = null;
+
+        // 检查是否已登录
+        window.onload = function () {
+            const token = localStorage.getItem('token');
+            const username = localStorage.getItem('username');
+            const userId = localStorage.getItem('user_id');
+            if (token) {
+                showChat(username, userId);
             }
-        } catch (error) {
-            alert(error.message);
-            throw error;
+        };
+
+        function toggleView() {
+            loginBox.classList.toggle('hidden');
+            registerBox.classList.toggle('hidden');
         }
-    }
 
-    document.getElementById('login-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('login-username').value;
-        const password = document.getElementById('login-password').value;
+        function showChat(username, userId) {
+            loginBox.classList.add('hidden');
+            registerBox.classList.add('hidden');
+            chatBox.style.display = 'flex'; // 显式设置为 flex
+            chatBox.classList.remove('hidden');
 
-        try {
-            const result = await handleAuth('/api/v1/login', { username, password });
-            localStorage.setItem('token', result.data.token);
-            alert('登录成功！Token已保存');
-            console.log("Token:", result.data.token);
-            // 这里可以跳转到主页，例如 window.location.href = '/chat.html';
-        } catch (e) {
-            console.error(e);
+            if (username && userId) {
+                document.getElementById('current-user-info').innerText = `${username} (ID: ${userId})`;
+            }
+
+            connectWS();
         }
-    });
 
-    document.getElementById('register-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const username = document.getElementById('reg-username').value;
-        const password = document.getElementById('reg-password').value;
-
-        try {
-            await handleAuth('/api/v1/register', { username, password });
-            alert('注册成功，请登录');
-            toggleView();
-        } catch (e) {
-            console.error(e);
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('username');
+            localStorage.removeItem('user_id');
+            if (ws) ws.close();
+            location.reload();
         }
-    });
-</script>
+
+        async function handleAuth(url, data) {
+            try {
+                const response = await fetch(url, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+
+                if (response.ok && result.code === 200) {
+                    return result;
+                } else {
+                    throw new Error(result.msg || '操作失败');
+                }
+            } catch (error) {
+                alert(error.message);
+                throw error;
+            }
+        }
+
+        // WebSocket 连接
+        function connectWS() {
+            const token = localStorage.getItem('token');
+            if (!token) return;
+
+            // 注意：WebSocket 请求头不能自定义 Authorization，通常放在 URL 参数或协议头中
+            // 但 Gin 的中间件通常是从 Header 取，这里是一个小坑。
+            // 解决方案：我们在前端使用 Protocols 参数或者改后端支持 Query 参数。
+            // 简单起见，我们这里假设后端改成了从 Header 取（但标准 WS API 不支持自定义 Header）。
+            // 实际上，最通用的做法是把 Token 放在 URL 参数里： ws://localhost:8080/chat?token=...
+
+            // 由于我们之前的中间件是读 Header 的，WebSocket 握手请求是 HTTP，虽然浏览器 JS API 不支持加 Header，
+            // 但我们可以修改后端中间件支持 Query 参数，或者简单点，先假定 Token 放在 Header (这需要非浏览器客户端)。
+            // 
+            // 为了让浏览器能跑通，我们需要修改后端中间件逻辑：优先读 Header，没有则读 Query 参数 "token"。
+
+            // 这里我们先用 URL 参数传递 Token
+            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
+            // 修正：后端路由是 /api/v1/chat
+            const wsUrl = `${protocol}//${location.host}/api/v1/chat?token=${token}`;
+
+            ws = new WebSocket(wsUrl);
+
+            ws.onopen = () => {
+                console.log("WebSocket 连接成功");
+                appendMessage("系统", "连接服务器成功", "system");
+            };
+
+            ws.onmessage = (event) => {
+                const msg = JSON.parse(event.data);
+                appendMessage(msg.sender_id, msg.content, "other");
+            };
+
+            ws.onclose = () => {
+                console.log("WebSocket 连接断开");
+                appendMessage("系统", "连接已断开", "system");
+            };
+
+            ws.onerror = (err) => {
+                console.error("WS Error:", err);
+            };
+        }
+
+        function sendMessage() {
+            const receiverID = document.getElementById('receiver-id').value;
+            const content = document.getElementById('msg-content').value;
+
+            if (!receiverID || !content) {
+                alert("请输入接收者ID和消息内容");
+                return;
+            }
+
+            const msg = {
+                type: "chat",
+                receiver_id: parseInt(receiverID),
+                content: content
+            };
+
+            ws.send(JSON.stringify(msg));
+            appendMessage("我", content, "self");
+            document.getElementById('msg-content').value = '';
+        }
+
+        function appendMessage(sender, text, type) {
+            const list = document.getElementById('message-list');
+            const div = document.createElement('div');
+
+            div.style.padding = '0.5rem 1rem';
+            div.style.maxWidth = '70%';
+            div.style.borderRadius = '1rem';
+            div.style.marginBottom = '0.5rem';
+            div.innerText = text;
+
+            if (type === 'self') {
+                div.style.alignSelf = 'flex-end';
+                div.style.background = '#667eea';
+                div.style.color = 'white';
+                div.style.borderRadius = '1rem 1rem 0 1rem';
+            } else if (type === 'system') {
+                div.style.alignSelf = 'center';
+                div.style.background = '#edf2f7';
+                div.style.color = '#718096';
+                div.style.fontSize = '0.8rem';
+            } else {
+                div.style.alignSelf = 'flex-start';
+                div.style.background = '#edf2f7';
+                div.style.color = '#2d3748';
+                div.style.borderRadius = '1rem 1rem 1rem 0';
+                // 可以显示发送者ID
+                div.innerHTML = `<div style="font-size:0.7rem;color:#718096;margin-bottom:0.2rem">用户 ${sender}</div>${text}`;
+            }
+
+            list.appendChild(div);
+            list.scrollTop = list.scrollHeight;
+        }
+
+        document.getElementById('login-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('login-username').value;
+            const password = document.getElementById('login-password').value;
+
+            try {
+                const result = await handleAuth('/api/v1/login', { username, password });
+                localStorage.setItem('token', result.token);
+                localStorage.setItem('username', result.username);
+                localStorage.setItem('user_id', result.user_id);
+                // alert('登录成功！');
+                showChat(result.username, result.user_id);
+            } catch (e) {
+                console.error(e);
+            }
+        });
+
+        document.getElementById('register-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const username = document.getElementById('reg-username').value;
+            const password = document.getElementById('reg-password').value;
+
+            try {
+                await handleAuth('/api/v1/register', { username, password });
+                alert('注册成功，请登录');
+                toggleView();
+            } catch (e) {
+                console.error(e);
+            }
+        });
+    </script>
 
 </body>
+
 </html>

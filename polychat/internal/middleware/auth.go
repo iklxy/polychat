@@ -10,26 +10,38 @@ import (
 
 func JWTAuthMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
+		var token string
 		// 从请求头中获取Authorization字段
 		authHeader := c.GetHeader("Authorization")
-		if authHeader == "" {
-			c.JSON(http.StatusUnauthorized,
-				gin.H{"code": "401", "msg": "未授权"})
+		// 如果有Authorization字段，检查Bearer格式
+		if authHeader != "" {
+			parts := strings.SplitN(authHeader, " ", 2)
+			if len(parts) != 2 || parts[0] != "Bearer" {
+				c.JSON(http.StatusUnauthorized, gin.H{"code": "402", "msg": "格式错误"})
+				c.Abort()
+				return
+			}
+			token = parts[1]
+		} else {
+			// 如果没有Authorization字段，尝试从查询参数中获取token
+			token = c.Query("token")
 		}
-		// 检查Authorization字段是否符合Bearer格式
-		parts := strings.SplitN(authHeader, " ", 2)
-		if len(parts) != 2 || parts[0] != "Bearer" {
-			c.JSON(http.StatusUnauthorized,
-				gin.H{"code": "402", "msg": "格式错误"})
+
+		if token == "" {
+			c.JSON(http.StatusUnauthorized, gin.H{"code": "403", "msg": "未提供token"})
+			c.Abort()
+			return
 		}
-		//校验token是否有效
-		token := parts[1]
+
+		// 校验token是否有效
 		claims, err := util.ParseToken(token)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized,
-				gin.H{"code": "403", "msg": "token无效"})
+			c.JSON(http.StatusUnauthorized, gin.H{"code": "403", "msg": "token无效"})
+			c.Abort()
+			return
 		}
 		//将claims中的用户信息设置到上下文
+		c.Set("userID", claims.UserID) // 便利后续使用
 		c.Set("claims", claims)
 		c.Next()
 	}
