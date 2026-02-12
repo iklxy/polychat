@@ -25,7 +25,7 @@ func InitDB() {
 
 	//通过model包中的User结构体，自动创建数据库中的user表
 	err = DB.AutoMigrate(&model.User{})
-
+	err = DB.AutoMigrate(&model.Relation{})
 	if err != nil {
 		//在err不为空的时候，说明创建表失败，抛出异常且终止流程
 		panic("数据库创建表失败" + err.Error())

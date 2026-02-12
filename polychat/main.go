@@ -26,7 +26,7 @@ func main() {
 
 	//3.注册路由
 	userHandle := api.UserHandle{}
-
+	RelationHandle := api.RelationHandler{}
 	//公开接口，不需要Token验证
 	v1 := r.Group("/api/v1")
 	{
@@ -39,6 +39,14 @@ func main() {
 	authorized.Use(middleware.JWTAuthMiddleware())
 	{
 		authorized.GET("/chat", api.ConnectWS)
+
+		// 好友关系模块
+		relationGroup := authorized.Group("/relation")
+		{
+			relationGroup.POST("/add", RelationHandle.AddFriend)
+			relationGroup.POST("/delete", RelationHandle.DeleteFriend)
+			relationGroup.GET("/list", RelationHandle.GetFriend)
+		}
 	}
 	fmt.Println("服务器运行在8080端口")
 	if err := r.Run(":8080"); err != nil {

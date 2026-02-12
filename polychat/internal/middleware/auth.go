@@ -36,7 +36,9 @@ func JWTAuthMiddleware() gin.HandlerFunc {
 		// 校验token是否有效
 		claims, err := util.ParseToken(token)
 		if err != nil {
-			c.JSON(http.StatusUnauthorized, gin.H{"code": "403", "msg": "token无效"})
+			// 添加错误日志输出
+			// fmt.Println("Token解析失败:", err)
+			c.JSON(http.StatusUnauthorized, gin.H{"code": "403", "msg": "token无效: " + err.Error()})
 			c.Abort()
 			return
 		}
