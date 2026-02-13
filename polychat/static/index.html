@@ -304,13 +304,10 @@
                 const response = await fetch('/api/v1/relation/list', {
                     method: 'GET',
                     headers: {
-                        'Authorization': token // 假设这里不需要 Bearer 前缀，或者之前逻辑不需要
+                        'Authorization': `Bearer ${token}` // 假设这里不需要 Bearer 前缀，或者之前逻辑不需要
                     }
                 });
 
-                // 注意：如果你的后端中间件需要 "Bearer " 前缀，请确保这里加上。
-                // 之前的代码中似乎直接存了 token，没有看到加 Bearer 的逻辑，
-                // 如果后端解析需要，请自行调整。这里先按简单传递 token 处理。
 
                 const result = await response.json();
                 if (response.ok && result.code === 200) {
@@ -341,7 +338,6 @@
                 item.onclick = () => selectFriend(friend.target_id, item);
 
                 const nameSpan = document.createElement('span');
-                // 如果有备注显示备注，否则显示 ID
                 const displayName = friend.note || `用户 ${friend.target_id}`;
                 nameSpan.innerText = `${displayName} (${friend.target_id})`;
 
@@ -397,7 +393,7 @@
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': token
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(payload)
                 });
@@ -421,14 +417,15 @@
             try {
                 const token = localStorage.getItem('token');
                 const payload = {
-                    target_id: parseInt(targetId)
+                    target_id: parseInt(targetId),
+                    relation_type: 1
                 };
 
                 const response = await fetch('/api/v1/relation/delete', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
-                        'Authorization': token
+                        'Authorization': `Bearer ${token}`
                     },
                     body: JSON.stringify(payload)
                 });

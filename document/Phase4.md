@@ -22,11 +22,17 @@ id session_id sender_id receiver_id content type timestamp
 
 三.API
 1.请求添加好友
+(1)实现了通过id添加好友的功能
 POST /relation/add
 {
     "target_id": ,
     "relation_type": ,
     "Desc": 
+}
+(2)通过备注添加好友
+POST /relation/addbynote
+{
+    "note": ,
 }
 
 2.请求删除好友
@@ -44,3 +50,11 @@ GET /chat/history
     "owner_id": ,
     "target_id": ,
 }
+
+5.修改好友关系备注
+POST /relation/modify
+{
+    "target_id": ,
+    "Desc": ,
+}
+
