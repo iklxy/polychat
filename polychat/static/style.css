@@ -543,3 +543,92 @@ button:hover {
 .hidden {
     display: none !important;
 }
+
+/* Inbox Button & Badge */
+.inbox-btn {
+    position: relative;
+}
+
+.inbox-badge {
+    position: absolute;
+    top: -2px;
+    right: -4px;
+    background-color: var(--danger-color);
+    color: white;
+    font-size: 0.65rem;
+    font-weight: 700;
+    min-width: 16px;
+    height: 16px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 3px;
+    line-height: 1;
+}
+
+/* Inbox List */
+.inbox-list {
+    max-height: 350px;
+    overflow-y: auto;
+    margin-top: 0.8rem;
+}
+
+.inbox-request-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.7rem 0.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.inbox-request-item:last-child {
+    border-bottom: none;
+}
+
+.inbox-request-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+}
+
+.inbox-request-name {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.inbox-request-id {
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+}
+
+.inbox-actions {
+    display: flex;
+    gap: 0.4rem;
+}
+
+.inbox-actions button {
+    width: auto;
+    padding: 0.35rem 0.7rem;
+    font-size: 0.8rem;
+    border-radius: 0.4rem;
+}
+
+.inbox-accept-btn {
+    background-color: var(--success-color);
+    color: white;
+}
+
+.inbox-accept-btn:hover {
+    background-color: #2db84e;
+}
+
+.inbox-reject-btn {
+    background-color: #f2f3f5;
+    color: var(--text-primary);
+}
+
+.inbox-reject-btn:hover {
+    background-color: #e5e6e8;
+}

@@ -19,3 +19,13 @@ func GetUserByUsername(username string) (*model.User, error) {
 	}
 	return &user, nil
 }
+
+// GetUserByID 根据用户ID查询用户
+func GetUserByID(userID uint) (*model.User, error) {
+	var user model.User
+	err := database.DB.First(&user, userID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

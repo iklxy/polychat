@@ -9,9 +9,15 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// messageHandle 消息历史记录处理器实例
+var messageHandle = api.MessageHandle{}
+
 func main() {
 	// 1. 初始化数据库连接
 	database.InitDB()
+	// 1.1 初始化 MongoDB 连接（用于存储聊天历史记录）
+	database.InitMongoDB()
+	defer database.CloseMongoDB()
 
 	gin.SetMode(gin.ReleaseMode)
 	// 2.初始化gin引擎
@@ -38,7 +44,13 @@ func main() {
 	authorized := v1.Group("/")
 	authorized.Use(middleware.JWTAuthMiddleware())
 	{
-		authorized.GET("/chat", api.ConnectWS)
+		authorized.GET("/chat", api.ConnectWSWithHistory)
+
+		// 消息历史记录模块
+		messageGroup := authorized.Group("/message")
+		{
+			messageGroup.GET("/history", messageHandle.GetHistory)
+		}
 
 		// 好友关系模块
 		relationGroup := authorized.Group("/relation")
@@ -47,6 +59,9 @@ func main() {
 			relationGroup.POST("/delete", RelationHandle.DeleteFriend)
 			relationGroup.GET("/list", RelationHandle.GetFriend)
 			relationGroup.POST("/update_note", RelationHandle.UpdateFriendNote)
+			relationGroup.GET("/pending", RelationHandle.GetPendingRequests)
+			relationGroup.POST("/accept", RelationHandle.AcceptFriend)
+			relationGroup.POST("/reject", RelationHandle.RejectFriend)
 		}
 	}
 	fmt.Println("服务器运行在8080端口")

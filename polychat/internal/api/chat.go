@@ -1,3 +1,4 @@
+// 旧版chat的api
 package api
 
 import (

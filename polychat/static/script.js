@@ -40,6 +40,7 @@ function showChat(username, userId) {
 
     // 获取好友列表
     fetchFriends();
+    fetchPendingRequests();
     connectWS();
 }
 
@@ -122,13 +123,7 @@ function renderFriends(friends) {
         // 在线状态
         const status = document.createElement('div');
         status.className = 'online-status';
-        // 使用后端返回的真实在线状态
-        if (friend.is_online) {
-            status.classList.add('online');
-            status.title = "在线";
-        } else {
-            status.title = "离线";
-        }
+        if (friend.is_online) status.classList.add('online');
         avatar.appendChild(status);
 
         const info = document.createElement('div');
@@ -164,17 +159,53 @@ function selectFriend(targetId, note, domItem) {
     items.forEach(i => i.classList.remove('active'));
     if (domItem) domItem.classList.add('active');
 
-    // 清空消息区域或加载历史消息 (此处仅显示欢迎语)
+    // 清空消息区域并加载历史消息
     const msgList = document.getElementById('message-list');
     msgList.innerHTML = '';
+    fetchHistory(targetId);
+}
 
-    // 模拟加载历史消息的视觉效果
-    const welcome = document.createElement('div');
-    welcome.className = 'message-meta';
-    welcome.style.textAlign = 'center';
-    welcome.style.marginTop = '1rem';
-    welcome.innerText = `与 ${displayName} 开始聊天`;
-    msgList.appendChild(welcome);
+async function fetchHistory(targetId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch(`/api/v1/message/history?target_id=${targetId}&page=1&page_size=50`, {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const result = await response.json();
+        if (response.ok && result.code === 200) {
+            const myId = parseInt(localStorage.getItem('user_id'));
+            const msgList = document.getElementById('message-list');
+
+            if (!result.data || !result.data.messages || result.data.messages.length === 0) {
+                const welcome = document.createElement('div');
+                welcome.className = 'message-meta';
+                welcome.style.textAlign = 'center';
+                welcome.style.marginTop = '1rem';
+                welcome.innerText = `与 User ${targetId} 开始聊天`;
+                msgList.appendChild(welcome);
+                return;
+            }
+
+            // 历史消息按时间正序显示（API可能返回倒序）
+            const messages = result.data.messages.slice().reverse();
+            messages.forEach(msg => {
+                const isSelf = msg.sender_id === myId;
+                appendMessage(
+                    isSelf ? 'Me' : `User ${msg.sender_id}`,
+                    msg.content,
+                    isSelf ? 'self' : 'other'
+                );
+            });
+        } else {
+            console.error("获取历史消息失败:", result.msg);
+        }
+    } catch (error) {
+        console.error("获取历史消息错误:", error);
+    }
 }
 
 // --- 右键菜单功能 ---
@@ -292,7 +323,7 @@ async function addFriend() {
             document.getElementById('add-friend-desc').value = '';
             fetchFriends(); // 刷新列表
         } else {
-            alert("添加失败: " + result.msg);
+            alert("添加失败: " + (result.message || result.msg || "未知错误"));
         }
     } catch (error) {
         console.error(error);
@@ -327,7 +358,7 @@ async function deleteFriend(targetId) {
                 document.getElementById('message-list').innerHTML = '<div class="welcome-message">好友已删除</div>';
             }
         } else {
-            alert("删除失败: " + result.msg);
+            alert("删除失败: " + (result.message || result.msg || "未知错误"));
         }
     } catch (error) {
         console.error(error);
@@ -385,17 +416,25 @@ function connectWS() {
 
     ws.onmessage = (event) => {
         const msg = JSON.parse(event.data);
-        // 如果收到消息，且是当前聊天对象发来的，或者是我发给当前聊天对象的
-        // 这里简单处理：只要有消息就追加。更好的做法是判断 sender_id
 
-        let type = 'other';
-        let senderName = `User ${msg.sender_id}`;
+        // 处理好友请求通知
+        if (msg.type === 'friend_request') {
+            fetchPendingRequests();
+            return;
+        }
 
-        // 判断是否是当前聊天窗口
-        // 注意：WebSocket 返回的消息可能不包含 sender_id (如果是系统消息)
+        // 处理好友接受通知
+        if (msg.type === 'friend_accept') {
+            fetchFriends();
+            return;
+        }
 
+        // 普通聊天消息
         if (msg.sender_id) {
-            appendMessage(msg.sender_id, msg.content, type);
+            // 仅当消息来自当前聊天对象时才显示
+            if (currentChatTarget && msg.sender_id == currentChatTarget) {
+                appendMessage(`User ${msg.sender_id}`, msg.content, 'other');
+            }
         }
     };
 
@@ -487,6 +526,143 @@ document.getElementById('register-form').addEventListener('submit', async (e) =>
         console.error(e);
     }
 });
+
+// --- 消息箱功能 ---
+
+function openInbox() {
+    fetchPendingRequests();
+    document.getElementById('inbox-modal').classList.remove('hidden');
+}
+
+async function fetchPendingRequests() {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/v1/relation/pending', {
+            method: 'GET',
+            headers: {
+                'Authorization': `Bearer ${token}`
+            }
+        });
+
+        const result = await response.json();
+        if (response.ok && result.code === 200) {
+            renderPendingRequests(result.data);
+            updateInboxBadge(result.data ? result.data.length : 0);
+        } else {
+            console.error("获取待处理请求失败:", result.msg);
+        }
+    } catch (error) {
+        console.error("获取待处理请求错误:", error);
+    }
+}
+
+function renderPendingRequests(requests) {
+    const list = document.getElementById('inbox-list');
+    list.innerHTML = '';
+
+    if (!requests || requests.length === 0) {
+        list.innerHTML = '<div class="empty-state">暂无待处理请求</div>';
+        return;
+    }
+
+    requests.forEach(req => {
+        const item = document.createElement('div');
+        item.className = 'inbox-request-item';
+
+        const info = document.createElement('div');
+        info.className = 'inbox-request-info';
+
+        const name = document.createElement('div');
+        name.className = 'inbox-request-name';
+        name.innerText = req.owner_name || `User ${req.owner_id}`;
+
+        const id = document.createElement('div');
+        id.className = 'inbox-request-id';
+        id.innerText = `ID: ${req.owner_id}`;
+
+        info.appendChild(name);
+        info.appendChild(id);
+
+        const actions = document.createElement('div');
+        actions.className = 'inbox-actions';
+
+        const acceptBtn = document.createElement('button');
+        acceptBtn.className = 'inbox-accept-btn';
+        acceptBtn.innerText = '接受';
+        acceptBtn.onclick = () => acceptFriendRequest(req.owner_id);
+
+        const rejectBtn = document.createElement('button');
+        rejectBtn.className = 'inbox-reject-btn';
+        rejectBtn.innerText = '拒绝';
+        rejectBtn.onclick = () => rejectFriendRequest(req.owner_id);
+
+        actions.appendChild(acceptBtn);
+        actions.appendChild(rejectBtn);
+
+        item.appendChild(info);
+        item.appendChild(actions);
+        list.appendChild(item);
+    });
+}
+
+function updateInboxBadge(count) {
+    const badge = document.getElementById('inbox-badge');
+    if (count > 0) {
+        badge.innerText = count > 99 ? '99+' : count;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+async function acceptFriendRequest(requesterId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/v1/relation/accept', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ requester_id: parseInt(requesterId) })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.code === 200) {
+            fetchPendingRequests();
+            fetchFriends();
+        } else {
+            alert("接受失败: " + (result.msg || "未知错误"));
+        }
+    } catch (error) {
+        console.error(error);
+        alert("操作出错");
+    }
+}
+
+async function rejectFriendRequest(requesterId) {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await fetch('/api/v1/relation/reject', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${token}`
+            },
+            body: JSON.stringify({ requester_id: parseInt(requesterId) })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.code === 200) {
+            fetchPendingRequests();
+        } else {
+            alert("拒绝失败: " + (result.msg || "未知错误"));
+        }
+    } catch (error) {
+        console.error(error);
+        alert("操作出错");
+    }
+}
 
 // 支持按回车发送
 document.getElementById('msg-content').addEventListener('keypress', function (e) {

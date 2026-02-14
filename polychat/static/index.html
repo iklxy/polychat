@@ -59,8 +59,14 @@
         <aside class="sidebar" id="sidebar">
             <div class="sidebar-header">
                 <div class="logo">小洋窝</div>
-                <button onclick="addFriendModal()" class="icon-btn" title="添加好友"><i
-                        class="fas fa-user-plus"></i></button>
+                <div style="display:flex;gap:0.3rem;align-items:center;">
+                    <button onclick="openInbox()" class="icon-btn inbox-btn" title="消息箱">
+                        <i class="fas fa-inbox"></i>
+                        <span id="inbox-badge" class="inbox-badge hidden">0</span>
+                    </button>
+                    <button onclick="addFriendModal()" class="icon-btn" title="添加好友"><i
+                            class="fas fa-user-plus"></i></button>
+                </div>
             </div>
 
             <div class="friend-list-container">
@@ -137,6 +143,17 @@
                 <input type="text" id="add-friend-desc" placeholder="备注 (选填)">
             </div>
             <button onclick="addFriend()">发送请求</button>
+        </div>
+    </div>
+
+    <!-- 消息箱弹窗 -->
+    <div id="inbox-modal" class="modal hidden">
+        <div class="modal-content" style="width:380px;">
+            <span class="close-modal" onclick="closeModal('inbox-modal')">&times;</span>
+            <h3>消息箱</h3>
+            <div id="inbox-list" class="inbox-list">
+                <div class="empty-state">暂无待处理请求</div>
+            </div>
         </div>
     </div>
 

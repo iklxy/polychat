@@ -4,8 +4,10 @@ package ws
 
 // 消息类型
 const (
-	TypeChat      = "chat"      // 聊天消息
-	TypeHeartbeat = "heartbeat" // 心跳消息
+	TypeChat          = "chat"           // 聊天消息
+	TypeHeartbeat     = "heartbeat"      // 心跳消息
+	TypeFriendRequest = "friend_request" // 好友请求通知
+	TypeFriendAccept  = "friend_accept"  // 好友接受通知
 )
 
 type Message struct {
