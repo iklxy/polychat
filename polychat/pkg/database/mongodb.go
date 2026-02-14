@@ -26,7 +26,7 @@ var (
 
 // MongoDB 连接配置常量
 const (
-	mongoHost     = "127.0.0.1"     // MongoDB 服务器地址（本机）
+	mongoHost     = "47.110.94.115" // MongoDB 服务器地址（本机）
 	mongoPort     = "27017"         // MongoDB 服务端口
 	mongoUser     = "admin"         // 认证用户名
 	mongoPassword = "YY010303"      // 认证密码

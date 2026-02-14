@@ -13,7 +13,7 @@ var DB *gorm.DB
 
 func InitDB() {
 	//dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
-	dsn := "admin:YY010303@tcp(127.0.0.1:3306)/polychat_db?charset=utf8mb4&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s&allowNativePasswords=true&tls=false"
+	dsn := "admin:YY010303@tcp(47.110.94.115:3306)/polychat_db?charset=utf8mb4&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s&allowNativePasswords=true&tls=false"
 
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
