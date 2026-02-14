@@ -46,6 +46,7 @@ func main() {
 			relationGroup.POST("/add", RelationHandle.AddFriend)
 			relationGroup.POST("/delete", RelationHandle.DeleteFriend)
 			relationGroup.GET("/list", RelationHandle.GetFriend)
+			relationGroup.POST("/update_note", RelationHandle.UpdateFriendNote)
 		}
 	}
 	fmt.Println("服务器运行在8080端口")

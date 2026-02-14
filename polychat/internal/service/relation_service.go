@@ -27,3 +27,8 @@ func (s *RelationService) DeleteFriend(ownerID, targetID uint) error {
 func (s *RelationService) GetFriend(ownerID uint) ([]model.Relation, error) {
 	return dao.GetRelation(ownerID)
 }
+
+// UpdateFriendNote 更新好友备注
+func (s *RelationService) UpdateFriendNote(ownerID, targetID uint, note string) error {
+	return dao.UpdateRelationNote(ownerID, targetID, note)
+}

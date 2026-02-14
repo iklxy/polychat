@@ -24,3 +24,9 @@ func GetRelation(ownerID uint) ([]model.Relation, error) {
 	}
 	return relations, nil
 }
+
+// UpdateRelationNote 更改好友关系备注
+func UpdateRelationNote(ownerID, targetID uint, note string) error {
+	return database.DB.Model(&model.Relation{}).Where("owner_id = ? and target_id = ? ",
+		ownerID, targetID).Update("note", note).Error
+}

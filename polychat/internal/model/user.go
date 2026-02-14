@@ -17,6 +17,6 @@ type User struct {
 	Username string `gorm:"uniqueIndex;type:varchar(20);not null"`
 	//密码允许重复
 	Password string `gorm:"type:varchar(100);not null"` // 存加密之后的哈希值
-	Email    string `gorm:"type:varchar(100)"`
-	Avatar   string `gorm:"type:varchar(255)"` // 头像URL
+	Email    string `gorm:"type:varchar(100)"`          //邮箱email
+	Avatar   string `gorm:"type:varchar(255)"`          // 头像URL
 }

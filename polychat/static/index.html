@@ -4,601 +4,153 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PolyChat - 简洁连接</title>
-    <style>
-        :root {
-            --primary-color: #667eea;
-            --secondary-color: #764ba2;
-            --text-color: #2d3748;
-            --bg-color: #f7fafc;
-        }
-
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 0;
-            color: var(--text-color);
-        }
-
-        .container {
-            background-color: white;
-            padding: 2.5rem;
-            border-radius: 1rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-            width: 100%;
-            max-width: 350px;
-            transition: transform 0.3s ease;
-        }
-
-        .container:hover {
-            transform: translateY(-5px);
-        }
-
-        h2 {
-            text-align: center;
-            margin-bottom: 2rem;
-            color: var(--secondary-color);
-            font-weight: 600;
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-size: 0.9rem;
-            color: #718096;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #e2e8f0;
-            border-radius: 0.5rem;
-            outline: none;
-            transition: border-color 0.2s;
-            box-sizing: border-box;
-            /* Important for padding */
-        }
-
-        .form-group input:focus {
-            border-color: var(--primary-color);
-        }
-
-        button {
-            width: 100%;
-            padding: 0.75rem;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color));
-            color: white;
-            border: none;
-            border-radius: 0.5rem;
-            cursor: pointer;
-            font-weight: 600;
-            transition: opacity 0.2s;
-        }
-
-        button:hover {
-            opacity: 0.9;
-        }
-
-        .toggle-text {
-            text-align: center;
-            margin-top: 1.5rem;
-            font-size: 0.9rem;
-            color: #718096;
-        }
-
-        .toggle-text a {
-            color: var(--primary-color);
-            text-decoration: none;
-            cursor: pointer;
-            font-weight: 600;
-        }
-
-        /* 新增好友列表样式 */
-        .friend-item {
-            padding: 0.75rem;
-            background: white;
-            border-radius: 0.5rem;
-            margin-bottom: 0.5rem;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            transition: background-color 0.2s;
-            border: 1px solid #e2e8f0;
-        }
-
-        .friend-item:hover {
-            background-color: #ebf4ff;
-            border-color: var(--primary-color);
-        }
-
-        .friend-item.active {
-            background-color: var(--primary-color);
-            color: white;
-            border-color: var(--primary-color);
-        }
-
-        .friend-item .delete-btn {
-            color: #e53e3e;
-            font-weight: bold;
-            padding: 0.2rem 0.5rem;
-            border-radius: 0.3rem;
-            font-size: 1.2rem;
-            line-height: 1;
-        }
-
-        .friend-item.active .delete-btn {
-            color: white;
-        }
-
-        .friend-item .delete-btn:hover {
-            background-color: rgba(229, 62, 62, 0.1);
-        }
-
-        .friend-item.active .delete-btn:hover {
-            background-color: rgba(255, 255, 255, 0.2);
-        }
-
-        .hidden {
-            display: none;
-        }
-    </style>
+    <title>小洋窝 - PolyChat</title>
+    <link rel="stylesheet" href="static/style.css">
+    <!-- 引入 Font Awesome 用于图标 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 
 <body>
 
-    <div class="container" id="login-box">
-        <h2>欢迎回来</h2>
-        <form id="login-form">
-            <div class="form-group">
-                <label for="login-username">用户名</label>
-                <input type="text" id="login-username" required placeholder="请输入用户名">
-            </div>
-            <div class="form-group">
-                <label for="login-password">密码</label>
-                <input type="password" id="login-password" required placeholder="请输入密码">
-            </div>
-            <button type="submit">登 录</button>
-        </form>
-        <div class="toggle-text">
-            还没有账号？ <a onclick="toggleView()">去注册</a>
-        </div>
-    </div>
-
-    <div class="container hidden" id="register-box">
-        <h2>创建账号</h2>
-        <form id="register-form">
-            <div class="form-group">
-                <label for="reg-username">用户名</label>
-                <input type="text" id="reg-username" required placeholder="设置用户名">
-            </div>
-            <div class="form-group">
-                <label for="reg-password">密码</label>
-                <input type="password" id="reg-password" required placeholder="设置密码">
-            </div>
-            <button type="submit">注 册</button>
-        </form>
-        <div class="toggle-text">
-            已有账号？ <a onclick="toggleView()">去登录</a>
-        </div>
-    </div>
-
-    <!-- 聊天室界面 -->
-    <div class="container hidden" id="chat-box"
-        style="max-width: 900px; height: 80vh; display: none; flex-direction: column;">
-        <div
-            style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 1px solid #eee; padding-bottom: 1rem;">
-            <h2 style="margin: 0; text-align: left;">PolyChat 聊天室</h2>
-            <div>
-                <span id="current-user-info" style="margin-right: 1rem; color: #666; font-size: 0.9rem;"></span>
-                <button onclick="logout()"
-                    style="width: auto; padding: 0.5rem 1rem; background: #e53e3e; font-size: 0.9rem;">退出</button>
+    <!-- 登录/注册容器 -->
+    <div id="auth-container">
+        <!-- 登录界面 -->
+        <div class="auth-box" id="login-box">
+            <h2 class="auth-title">小洋窝</h2>
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">用户名</label>
+                    <input type="text" id="login-username" required placeholder="请输入用户名" class="shake-hover">
+                </div>
+                <div class="form-group">
+                    <label for="login-password">密码</label>
+                    <input type="password" id="login-password" required placeholder="请输入密码" class="shake-hover">
+                </div>
+                <button type="submit" class="shake-hover">登 录</button>
+            </form>
+            <div class="toggle-text">
+                还没有账号？ <a onclick="toggleView()">去注册</a>
             </div>
         </div>
 
-        <div style="display: flex; flex: 1; gap: 1rem; overflow: hidden;">
-            <!-- 左侧：好友列表与操作 -->
-            <div
-                style="width: 260px; background: #f8f9fa; border-radius: 0.5rem; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #e2e8f0;">
-
-                <!-- 添加好友区域 -->
-                <div style="padding: 1rem; border-bottom: 1px solid #e2e8f0; background: white;">
-                    <h3 style="margin-top: 0; margin-bottom: 0.8rem; font-size: 1rem; color: #4a5568;">添加好友</h3>
-                    <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
-                        <input type="number" id="add-friend-id" placeholder="ID"
-                            style="width: 60px; padding: 0.4rem; font-size: 0.9rem;">
-                        <input type="text" id="add-friend-desc" placeholder="备注"
-                            style="flex: 1; padding: 0.4rem; font-size: 0.9rem;">
-                    </div>
-                    <button onclick="addFriend()" style="padding: 0.4rem; font-size: 0.9rem;">添加</button>
+        <!-- 注册界面 -->
+        <div class="auth-box hidden" id="register-box">
+            <h2 class="auth-title">加入小洋窝</h2>
+            <form id="register-form">
+                <div class="form-group">
+                    <label for="reg-username">用户名</label>
+                    <input type="text" id="reg-username" required placeholder="设置用户名" class="shake-hover">
                 </div>
-
-                <!-- 好友列表区域 -->
-                <div style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
-                    <div style="padding: 0.8rem 1rem 0.4rem 1rem; font-size: 0.9rem; color: #718096; font-weight: 600;">
-                        我的好友</div>
-                    <div id="friend-list" style="flex: 1; overflow-y: auto; padding: 0 0.5rem 0.5rem 0.5rem;">
-                        <!-- 动态生成好友列表 -->
-                        <div style="text-align: center; color: #cbd5e0; margin-top: 2rem;">暂无好友</div>
-                    </div>
+                <div class="form-group">
+                    <label for="reg-password">密码</label>
+                    <input type="password" id="reg-password" required placeholder="设置密码" class="shake-hover">
                 </div>
-
-                <!-- 临时会话区域 -->
-                <div style="padding: 1rem; border-top: 1px solid #e2e8f0; background: #edf2f7;">
-                    <h4 style="margin: 0 0 0.5rem 0; font-size: 0.9rem; color: #718096;">临时会话</h4>
-                    <input type="number" id="receiver-id" placeholder="输入对方ID"
-                        style="padding: 0.5rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; width: 100%;">
-                </div>
-            </div>
-
-            <!-- 聊天消息区域 -->
-            <div
-                style="flex: 1; display: flex; flex-direction: column; background: white; border-radius: 0.5rem; border: 1px solid #e2e8f0;">
-                <div id="message-list"
-                    style="flex: 1; padding: 1rem; overflow-y: auto; display: flex; flex-direction: column; gap: 0.5rem;">
-                    <!-- 消息气泡示例 -->
-                    <div
-                        style="align-self: flex-start; background: #edf2f7; padding: 0.5rem 1rem; border-radius: 1rem 1rem 1rem 0; max-width: 70%;">
-                        欢迎来到 PolyChat!
-                    </div>
-                </div>
-
-                <div style="padding: 1rem; border-top: 1px solid #e2e8f0; display: flex; gap: 0.5rem;">
-                    <input type="text" id="msg-content" placeholder="输入消息..."
-                        style="flex: 1; padding: 0.75rem; border: 1px solid #e2e8f0; border-radius: 0.5rem; outline: none;">
-                    <button onclick="sendMessage()" style="width: auto; padding: 0 1.5rem;">发送</button>
-                </div>
+                <button type="submit" class="shake-hover">注 册</button>
+            </form>
+            <div class="toggle-text">
+                已有账号？ <a onclick="toggleView()">去登录</a>
             </div>
         </div>
     </div>
 
-    <script>
-        const loginBox = document.getElementById('login-box');
-        const registerBox = document.getElementById('register-box');
-        const chatBox = document.getElementById('chat-box');
-        let ws = null;
+    <!-- 聊天室主界面 -->
+    <div id="app-view" class="hidden">
+        <!-- 侧边栏 -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <div class="logo">小洋窝</div>
+                <button onclick="addFriendModal()" class="icon-btn" title="添加好友"><i
+                        class="fas fa-user-plus"></i></button>
+            </div>
 
-        // 检查是否已登录
-        window.onload = function () {
-            const token = localStorage.getItem('token');
-            const username = localStorage.getItem('username');
-            const userId = localStorage.getItem('user_id');
-            if (token) {
-                showChat(username, userId);
-            }
-        };
+            <div class="friend-list-container">
+                <div class="list-header">我的好友</div>
+                <div id="friend-list">
+                    <!-- 动态生成好友列表 -->
+                    <div class="empty-state">暂无好友</div>
+                </div>
+            </div>
 
-        function toggleView() {
-            loginBox.classList.toggle('hidden');
-            registerBox.classList.toggle('hidden');
-        }
+            <!-- 侧边栏底部：当前用户信息 -->
+            <div class="sidebar-footer">
+                <div class="user-profile-sidebar">
+                    <div class="avatar-placeholder small" id="current-user-avatar"></div>
+                    <div class="user-info-sidebar">
+                        <span class="username" id="current-user-name">Guest</span>
+                        <span class="userid" id="current-user-id">ID: --</span>
+                    </div>
+                </div>
+                <!-- 预留设置或退出按钮位置，如果不需要额外按钮可忽略 -->
+            </div>
+        </aside>
 
-        function showChat(username, userId) {
-            loginBox.classList.add('hidden');
-            registerBox.classList.add('hidden');
-            chatBox.style.display = 'flex'; // 显式设置为 flex
-            chatBox.classList.remove('hidden');
+        <!-- 主聊天区域 -->
+        <main class="chat-area">
+            <!-- 顶部栏 -->
+            <header class="chat-header">
+                <div class="header-left">
+                    <button id="sidebar-toggle" onclick="toggleSidebar()" class="icon-btn" title="切换侧边栏">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <!-- 当前聊天对象名称 -->
+                    <div id="chat-title" class="chat-title">小洋窝</div>
+                </div>
+                <div class="chat-actions">
+                    <button onclick="logout()" class="logout-btn-circle" title="退出登录">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </header>
 
-            if (username && userId) {
-                document.getElementById('current-user-info').innerText = `${username} (ID: ${userId})`;
-            }
+            <!-- 聊天内容 -->
+            <div class="message-container" id="message-list">
+                <div class="welcome-message">
+                    <h3>欢迎来到小洋窝</h3>
+                    <p>选择左侧好友开始聊天，或者添加新朋友。</p>
+                </div>
+            </div>
 
-            // 获取好友列表
-            fetchFriends();
-            connectWS();
-        }
+            <!-- 输入框区域 -->
+            <div class="input-area">
+                <!-- 临时会话输入框 (保留原有功能但优化UI) -->
+                <div class="temp-session-input hidden" id="temp-session-bar">
+                    <input type="number" id="receiver-id" placeholder="输入对方ID进行临时会话">
+                </div>
 
-        // --- 好友相关功能 ---
+                <div class="input-wrapper">
+                    <input type="text" id="msg-content" placeholder="发送消息..." autocomplete="off">
+                    <button onclick="sendMessage()" class="send-btn"><i class="fas fa-paper-plane"></i></button>
+                </div>
+            </div>
+        </main>
+    </div>
 
-        async function fetchFriends() {
-            try {
-                const token = localStorage.getItem('token');
-                const response = await fetch('/api/v1/relation/list', {
-                    method: 'GET',
-                    headers: {
-                        'Authorization': `Bearer ${token}` // 假设这里不需要 Bearer 前缀，或者之前逻辑不需要
-                    }
-                });
+    <!-- 添加好友弹窗 -->
+    <div id="add-friend-modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal('add-friend-modal')">&times;</span>
+            <h3>添加好友</h3>
+            <div class="form-group">
+                <input type="number" id="add-friend-id" placeholder="好友ID">
+            </div>
+            <div class="form-group">
+                <input type="text" id="add-friend-desc" placeholder="备注 (选填)">
+            </div>
+            <button onclick="addFriend()">发送请求</button>
+        </div>
+    </div>
 
+    <!-- 自定义右键菜单 -->
+    <div id="context-menu" class="context-menu hidden">
+        <div class="menu-item" onclick="handleModifyRemark()">
+            <i class="fas fa-edit"></i> 修改备注
+        </div>
+        <div class="menu-item delete" onclick="handleDeleteFriend()">
+            <i class="fas fa-trash-alt"></i> 删除好友
+        </div>
+    </div>
 
-                const result = await response.json();
-                if (response.ok && result.code === 200) {
-                    renderFriends(result.data);
-                } else {
-                    console.error("获取好友列表失败:", result.msg);
-                }
-            } catch (error) {
-                console.error("获取好友列表错误:", error);
-            }
-        }
-
-        function renderFriends(friends) {
-            const list = document.getElementById('friend-list');
-            list.innerHTML = '';
-
-            if (!friends || friends.length === 0) {
-                list.innerHTML = '<div style="text-align: center; color: #cbd5e0; margin-top: 2rem;">暂无好友</div>';
-                return;
-            }
-
-            friends.forEach(friend => {
-                // 假设 friend 对象包含: target_id, note (或 desc)
-                // 根据文档，返回结构可能需要确认。通常是 { target_id: 123, note: "备注", relation_type: 1 }
-
-                const item = document.createElement('div');
-                item.className = 'friend-item';
-                item.onclick = () => selectFriend(friend.target_id, item);
-
-                const nameSpan = document.createElement('span');
-                const displayName = friend.note || `用户 ${friend.target_id}`;
-                nameSpan.innerText = `${displayName} (${friend.target_id})`;
-
-                const deleteBtn = document.createElement('span');
-                deleteBtn.className = 'delete-btn';
-                deleteBtn.innerHTML = '&times;';
-                deleteBtn.title = '删除好友';
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation(); // 防止触发选择
-                    if (confirm(`确定要删除好友 ${displayName} 吗？`)) {
-                        deleteFriend(friend.target_id);
-                    }
-                };
-
-                item.appendChild(nameSpan);
-                item.appendChild(deleteBtn);
-                list.appendChild(item);
-            });
-        }
-
-        function selectFriend(targetId, domItem) {
-            document.getElementById('receiver-id').value = targetId;
-
-            // 高亮选中状态
-            const items = document.querySelectorAll('.friend-item');
-            items.forEach(i => i.classList.remove('active'));
-            if (domItem) domItem.classList.add('active');
-
-            // 可选：清空消息列表，或者加载历史记录（待实现）
-            // document.getElementById('message-list').innerHTML = '';
-            // appendMessage('系统', `已切换至与用户 ${targetId} 的聊天`, 'system');
-        }
-
-        async function addFriend() {
-            const targetId = document.getElementById('add-friend-id').value;
-            const desc = document.getElementById('add-friend-desc').value;
-
-            if (!targetId) {
-                alert("请输入好友ID");
-                return;
-            }
-
-            try {
-                const token = localStorage.getItem('token');
-                // 根据文档 Phase4.md，参数为 target_id, relation_type, Desc
-                const payload = {
-                    target_id: parseInt(targetId),
-                    relation_type: 1, // 1代表好友
-                    Desc: desc || ""  // 备注
-                };
-
-                const response = await fetch('/api/v1/relation/add', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (response.ok && result.code === 200) {
-                    alert("添加成功");
-                    document.getElementById('add-friend-id').value = '';
-                    document.getElementById('add-friend-desc').value = '';
-                    fetchFriends(); // 刷新列表
-                } else {
-                    alert("添加失败: " + result.msg);
-                }
-            } catch (error) {
-                console.error(error);
-                alert("添加出错");
-            }
-        }
-
-        async function deleteFriend(targetId) {
-            try {
-                const token = localStorage.getItem('token');
-                const payload = {
-                    target_id: parseInt(targetId),
-                    relation_type: 1
-                };
-
-                const response = await fetch('/api/v1/relation/delete', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token}`
-                    },
-                    body: JSON.stringify(payload)
-                });
-
-                const result = await response.json();
-                if (response.ok && result.code === 200) {
-                    fetchFriends(); // 刷新列表
-                } else {
-                    alert("删除失败: " + result.msg);
-                }
-            } catch (error) {
-                console.error(error);
-                alert("删除出错");
-            }
-        }
-
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('username');
-            localStorage.removeItem('user_id');
-            if (ws) ws.close();
-            location.reload();
-        }
-
-        async function handleAuth(url, data) {
-            try {
-                const response = await fetch(url, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(data)
-                });
-                const result = await response.json();
-
-                if (response.ok && result.code === 200) {
-                    return result;
-                } else {
-                    throw new Error(result.msg || '操作失败');
-                }
-            } catch (error) {
-                alert(error.message);
-                throw error;
-            }
-        }
-
-        // WebSocket 连接
-        function connectWS() {
-            const token = localStorage.getItem('token');
-            if (!token) return;
-
-            // 注意：WebSocket 请求头不能自定义 Authorization，通常放在 URL 参数或协议头中
-            // 但 Gin 的中间件通常是从 Header 取，这里是一个小坑。
-            // 解决方案：我们在前端使用 Protocols 参数或者改后端支持 Query 参数。
-            // 简单起见，我们这里假设后端改成了从 Header 取（但标准 WS API 不支持自定义 Header）。
-            // 实际上，最通用的做法是把 Token 放在 URL 参数里： ws://localhost:8080/chat?token=...
-
-            // 由于我们之前的中间件是读 Header 的，WebSocket 握手请求是 HTTP，虽然浏览器 JS API 不支持加 Header，
-            // 但我们可以修改后端中间件支持 Query 参数，或者简单点，先假定 Token 放在 Header (这需要非浏览器客户端)。
-            // 
-            // 为了让浏览器能跑通，我们需要修改后端中间件逻辑：优先读 Header，没有则读 Query 参数 "token"。
-
-            // 这里我们先用 URL 参数传递 Token
-            const protocol = location.protocol === 'https:' ? 'wss:' : 'ws:';
-            // 修正：后端路由是 /api/v1/chat
-            const wsUrl = `${protocol}//${location.host}/api/v1/chat?token=${token}`;
-
-            ws = new WebSocket(wsUrl);
-
-            ws.onopen = () => {
-                console.log("WebSocket 连接成功");
-                appendMessage("系统", "连接服务器成功", "system");
-            };
-
-            ws.onmessage = (event) => {
-                const msg = JSON.parse(event.data);
-                appendMessage(msg.sender_id, msg.content, "other");
-            };
-
-            ws.onclose = () => {
-                console.log("WebSocket 连接断开");
-                appendMessage("系统", "连接已断开", "system");
-            };
-
-            ws.onerror = (err) => {
-                console.error("WS Error:", err);
-            };
-        }
-
-        function sendMessage() {
-            const receiverID = document.getElementById('receiver-id').value;
-            const content = document.getElementById('msg-content').value;
-
-            if (!receiverID || !content) {
-                alert("请输入接收者ID和消息内容");
-                return;
-            }
-
-            const msg = {
-                type: "chat",
-                receiver_id: parseInt(receiverID),
-                content: content
-            };
-
-            ws.send(JSON.stringify(msg));
-            appendMessage("我", content, "self");
-            document.getElementById('msg-content').value = '';
-        }
-
-        function appendMessage(sender, text, type) {
-            const list = document.getElementById('message-list');
-            const div = document.createElement('div');
-
-            div.style.padding = '0.5rem 1rem';
-            div.style.maxWidth = '70%';
-            div.style.borderRadius = '1rem';
-            div.style.marginBottom = '0.5rem';
-            div.innerText = text;
-
-            if (type === 'self') {
-                div.style.alignSelf = 'flex-end';
-                div.style.background = '#667eea';
-                div.style.color = 'white';
-                div.style.borderRadius = '1rem 1rem 0 1rem';
-            } else if (type === 'system') {
-                div.style.alignSelf = 'center';
-                div.style.background = '#edf2f7';
-                div.style.color = '#718096';
-                div.style.fontSize = '0.8rem';
-            } else {
-                div.style.alignSelf = 'flex-start';
-                div.style.background = '#edf2f7';
-                div.style.color = '#2d3748';
-                div.style.borderRadius = '1rem 1rem 1rem 0';
-                // 可以显示发送者ID
-                div.innerHTML = `<div style="font-size:0.7rem;color:#718096;margin-bottom:0.2rem">用户 ${sender}</div>${text}`;
-            }
-
-            list.appendChild(div);
-            list.scrollTop = list.scrollHeight;
-        }
-
-        document.getElementById('login-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('login-username').value;
-            const password = document.getElementById('login-password').value;
-
-            try {
-                const result = await handleAuth('/api/v1/login', { username, password });
-                localStorage.setItem('token', result.token);
-                localStorage.setItem('username', result.username);
-                localStorage.setItem('user_id', result.user_id);
-                // alert('登录成功！');
-                showChat(result.username, result.user_id);
-            } catch (e) {
-                console.error(e);
-            }
-        });
-
-        document.getElementById('register-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const username = document.getElementById('reg-username').value;
-            const password = document.getElementById('reg-password').value;
-
-            try {
-                await handleAuth('/api/v1/register', { username, password });
-                alert('注册成功，请登录');
-                toggleView();
-            } catch (e) {
-                console.error(e);
-            }
-        });
-    </script>
+    <script src="static/script.js"></script>
 
 </body>
 

@@ -40,6 +40,14 @@ func (cm *ClientManager) UnRegister(userID uint) {
 	}
 }
 
+// IsUserOnline 检查用户是否在线
+func (cm *ClientManager) IsUserOnline(userID uint) bool {
+	cm.Lock.RLock()
+	defer cm.Lock.RUnlock()
+	_, ok := cm.Clients[userID]
+	return ok
+}
+
 // 发送信息方法
 func (cm *ClientManager) SendMessage(msg Message) {
 	cm.Lock.RLock()
