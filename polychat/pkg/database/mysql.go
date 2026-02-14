@@ -2,7 +2,6 @@ package database
 
 import (
 	"fmt"
-	"os"
 	"polychat/internal/model"
 
 	"gorm.io/driver/mysql"
@@ -13,13 +12,8 @@ import (
 var DB *gorm.DB
 
 func InitDB() {
-	// 获取数据库Host，默认为远程IP（用于本地开发），部署到服务器时可通过环境变量 DB_HOST=127.0.0.1 指定
-	dbHost := os.Getenv("DB_HOST")
-	if dbHost == "" {
-		dbHost = "47.110.94.115"
-	}
-
-	dsn := fmt.Sprintf("admin:YY010303@tcp(%s:3306)/polychat_db?charset=utf8mb4&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s&allowNativePasswords=true&tls=false", dbHost)
+	//dsn := "user:pass@tcp(127.0.0.1:3306)/dbname?charset=utf8mb4&parseTime=True&loc=Local"
+	dsn := "admin:YY010303@tcp(127.0.0.1:3306)/polychat_db?charset=utf8mb4&parseTime=True&loc=Local&timeout=10s&readTimeout=30s&writeTimeout=30s&allowNativePasswords=true&tls=false"
 
 	var err error
 	DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
