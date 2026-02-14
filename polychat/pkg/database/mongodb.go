@@ -5,6 +5,7 @@ package database
 import (
 	"context"
 	"fmt"
+	"os"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -26,7 +27,7 @@ var (
 
 // MongoDB 连接配置常量
 const (
-	mongoHost     = "47.110.94.115" // MongoDB 服务器地址（与 MySQL 同服务器）
+	// mongoHost     = "47.110.94.115" // MongoDB 服务器地址（与 MySQL 同服务器）
 	mongoPort     = "27017"         // MongoDB 服务端口
 	mongoUser     = "admin"         // 认证用户名
 	mongoPassword = "YY010303"      // 认证密码
@@ -38,6 +39,12 @@ const (
 // 该函数应在服务启动时调用，在 HTTP 服务开始监听之前完成。
 // 如果连接失败或索引创建失败，程序将 panic 终止。
 func InitMongoDB() {
+	// 获取 MongoDB Host，默认为远程IP（用于本地开发），部署到服务器时可通过环境变量 MONGO_HOST=127.0.0.1 指定
+	mongoHost := os.Getenv("MONGO_HOST")
+	if mongoHost == "" {
+		mongoHost = "47.110.94.115"
+	}
+
 	// 构建 MongoDB 连接 URI（使用认证）
 	// 注意：根据您的反馈，admin 用户是在 polychat_db 数据库中验证的，
 	// 所以这里 authSource 应该指向 mongoDBName (polychat_db) 而不是 admin 系统库
